@@ -68,6 +68,25 @@ npm run dev
 | 模板市场 | `template` | 采集模板 | 模板编号、模板名称、适用站点 |
 | 采集流程 | `flowline` | 流程编排 | 流程编号、流程名称、步骤序列 |
 
+## 历史归档批次
+
+历史归档在归档策略之外新增「归档批次数据集」：一条归档策略可按归档周期分批生成
+归档批次，每个批次包含多个分区。相关接口：
+
+| 能力 | 接口 |
+| --- | --- |
+| 批次指标 / 列表 / 导出 | `GET /api/archive/batches/summary`、`GET /api/archive/batches`、`GET /api/archive/batches/export` |
+| 分批生成 | `POST /api/archive/batches`（`strategy`、`data_end`、`partition_count`、`fail_count`） |
+| 批次明细（含分区、落地、可清理范围） | `GET /api/archive/batches/{id}`、`GET /api/archive/batches/{id}/expired-scope` |
+| 批量动作（整组提交、逐条返回） | `POST /api/archive/batches/bulk` |
+| 归档落地清单 | `GET /api/archive/batches/{id}/landing`、`GET /api/storage/archive-landings` |
+| 完成顺序冲突 | `GET /api/archive/batches/recoverable`、`POST /api/archive/batches/conflicts/resolve` |
+
+`POST /api/archive/batches/bulk` 的动作取值为：`校验归档文件`、`补做失败分区`、`落地存储`、
+`进入可清理`、`清理回执`。批次必须先校验通过（写入校验摘要与 `已写入` 状态）才能落地或进入
+可清理范围；补做只重做失败分区；整组事务提交失败时回滚并保留上一版本；
+`/api/archive-batch` 是同一组接口的别名。
+
 ## 约定
 
 - 每个模块的前端页面在 `frontend/src/views/<模块>/index.vue`，后端接口在

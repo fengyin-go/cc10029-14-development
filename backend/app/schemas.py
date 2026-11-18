@@ -35,6 +35,27 @@ class ActionPayload(BaseModel):
     remark: str | None = None
 
 
+class ArchiveBatchPayload(BaseModel):
+    """生成归档批次：策略、截止日期与可选的失败注入。"""
+
+    strategy: str | int | None = None
+    data_end: str | None = None
+    partition_count: int | None = None
+    fail_count: int = 0
+    fail_partitions: list[int] = Field(default_factory=list)
+    submit_key: str | None = None
+
+
+class ArchiveBatchBulkPayload(BaseModel):
+    """归档批次数据集的批量动作；整组提交，逐条返回结果。"""
+
+    action: str
+    ids: list[int] = Field(default_factory=list)
+    checksum: str | None = None
+    receipt_no: str | None = None
+    simulate_commit_failure: bool = False
+
+
 
 class TargetsiteEntry(BaseModel):
     """目标站点明细结构。"""

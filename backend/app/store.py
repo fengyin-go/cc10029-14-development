@@ -14,12 +14,18 @@ class Store:
         self._tables: dict[str, list[dict[str, Any]]] = {
             name: [dict(row) for row in rows] for name, rows in SEED_ROWS.items()
         }
+        # 辅助表（如归档批次、分区、落地清单）只在内部使用，不计入业务模块统计。
+        self._aux: set[str] = set()
 
     def module_names(self) -> list[str]:
-        return sorted(self._tables)
+        return sorted(name for name in self._tables if name not in self._aux)
 
     def rows(self, module: str) -> list[dict[str, Any]]:
-        return self._tables.setdefault(module, [])
+        if module not in self._tables:
+            self._tables[module] = []
+            if module not in SEED_ROWS:
+                self._aux.add(module)
+        return self._tables[module]
 
     def find(self, module: str, entry_id: int) -> dict[str, Any] | None:
         for row in self.rows(module):

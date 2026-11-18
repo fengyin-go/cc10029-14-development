@@ -65,6 +65,17 @@ def export_entries(
         headers={"Content-Disposition": 'attachment; filename="storage.csv"'})
 
 
+@router.get("/archive-landings", response_model=PageResult[dict])
+def list_archive_landings(
+    batch_no: str | None = Query(default=None, description="按归档批次编号检索"),
+) -> PageResult[dict]:
+    """归档落地清单：由归档批次数据集落地动作驱动生成，与批次一一对应。"""
+    rows = service.landing_rows()
+    if batch_no:
+        rows = [row for row in rows if row.get("批次编号") == batch_no]
+    return PageResult(items=rows, total=len(rows), page=1, size=max(1, len(rows)))
+
+
 @router.get("/{entry_id}", response_model=dict)
 def get_entry(entry_id: int) -> dict:
     """读取单条存储配置明细；不存在时给出可读的错误说明。"""
